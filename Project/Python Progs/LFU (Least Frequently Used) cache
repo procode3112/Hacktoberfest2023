@@ -1,0 +1,93 @@
+# Maximum size of the cache
+cache_max_size = 4
+
+# Current size of the cache
+cache_size = 0
+
+# Cache data structure as a list
+cache = [None] * cache_max_size
+
+# Dictionary to store indices of cache items
+cache_indices = {}
+
+# Function to swap two values in a list
+def swap(a, b):
+    temp = a
+    a = b
+    b = temp
+
+# Function to get the index of the parent node in a heap
+def parent(i):
+    return (i - 1) // 2
+
+# Function to get the index of the left child node in a heap
+def left(i):
+    return 2 * i + 1
+
+# Function to get the index of the right child node in a heap
+def right(i):
+    return 2 * i + 2
+
+# Heapify function to rearrange nodes to maintain the heap property
+def heapify(heap, indices, i, n):
+    left_child = left(i)
+    right_child = right(i)
+    min_index = i
+
+    if left_child < n and heap[i][1] > heap[left_child][1]:
+        min_index = left_child
+
+    if right_child < n and heap[min_index][1] > heap[right_child][1]:
+        min_index = right_child
+
+    if min_index != i:
+        indices[heap[min_index][0]] = i
+        indices[heap[i][0]] = min_index
+        swap(heap[min_index], heap[i])
+        heapify(heap, indices, min_index, n)
+
+# Function to increment the frequency of a node and rearrange the heap
+def increment_frequency(heap, indices, i, n):
+    heap[i][1] += 1
+    heapify(heap, indices, i, n)
+
+# Function to insert a new node into the heap
+def insert(heap, indices, value, n):
+    if n == len(heap):
+        del indices[heap[0][0]]
+        print("Cache block " + str(heap[0][0]) + " removed.")
+        heap[0] = heap[n-1]
+        heapify(heap, indices, 0, n-1)
+    
+    heap[n] = [value, 1]
+    indices[value] = n
+    i = n
+
+    # Insert a node in the heap by swapping elements
+    while i > 0 and heap[parent(i)][1] > heap[i][1]:
+        indices[heap[i][0]] = parent(i)
+        indices[heap[parent(i)][0]] = i
+        swap(heap[i], heap[parent(i)])
+        i = parent(i)
+
+    print("Cache block " + str(value) + " inserted.")
+
+# Function to refer to a block value in the cache
+def refer(cache, indices, value, cache_size):
+    if value not in indices:
+        insert(cache, indices, value, cache_size)
+    else:
+        increment_frequency(cache, indices, indices[value], cache_size)
+
+# Driver code
+def main():
+    refer(cache, cache_indices, 1, cache_size)
+    refer(cache, cache_indices, 2, cache_size)
+    refer(cache, cache_indices, 1, cache_size)
+    refer(cache, cache_indices, 3, cache_size)
+    refer(cache, cache_indices, 2, cache_size)
+    refer(cache, cache_indices, 4, cache_size)
+    refer(cache, cache_indices, 5, cache_size)
+    return 0
+
+main()
